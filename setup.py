@@ -10,9 +10,11 @@ setup(
     install_requires=[
       'numpy',
       'scipy',
+      'opt_einsum',
       'pandas',
       'tabulate',
       'matplotlib',
+      'h5py',
       'jupyterlab'
       ],
     )

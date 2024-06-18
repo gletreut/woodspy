@@ -13,6 +13,7 @@ import logging
 logging.basicConfig(format='%(asctime)s [%(filename)s:%(lineno)s] %(message)s', datefmt='%Y-%m-%d %H:%M:%S', level=logging.INFO)
 
 import h5py
+import opt_einsum as oe
 import numpy as np
 
 #---------------------------------------------------------------------------
@@ -60,17 +61,20 @@ def compute_nabla_tilde(shape, a=1., reverse=False):
 
     return nabla_tilde
 
-def compute_laplacian_tilde(shape, a=1.):
+def compute_laplacian_tilde(shape, a=None):
     """
     compute the laplacian field.
       * shape: vector giving the size in each dimension of an input field.
-      * a: lattice site size. (length unit).
+      * a: lattice site size (length unit).
     """
 
     # build meshgrid of fourier frequencies
     Ks = compute_freq_mesh(shape)
+    if not (a is None):
+      # divide by delta_x (grid spacing)
+      Ks = oe.contract('a...,a->a...', Ks, 1./np.array(a))
 
-    # return -4.*np.sum(np.sin(np.pi*Ks)**2, axis=0)
+    # return -4.*np.sum(np.sin(np.pi*Ks)**2, axis=0) / a**2
     return -(2.*np.pi)**2 * np.sum(Ks**2, axis=0)
 
 def compute_fft(phi, start=1):
@@ -78,7 +82,8 @@ def compute_fft(phi, start=1):
     Compute the fft for the input field phi.
     Assumes that the dimension d<start are not to be Fourier transformed.
     """
-    xp = get_array_module(phi)
+    # xp = get_array_module(phi)
+    import numpy as xp
 
     shape = phi.shape
     ndim = len(shape)
@@ -91,7 +96,8 @@ def compute_ifft(phi_tilde, start=1):
     Assumes that the dimension d<start are not to be Fourier transformed.
     Assumes that the returned field must be real-valued.
     """
-    xp = get_array_module(phi_tilde)
+    # xp = get_array_module(phi_tilde)
+    import numpy as xp
 
     shape = phi_tilde.shape
     ndim = len(shape)

@@ -15,7 +15,8 @@ setup(
       'tabulate',
       'matplotlib',
       'h5py',
-      'jupyterlab'
+      'jupyterlab',
+      'pybind11[global]'  # HOOMD-blue
       ],
     )
 
